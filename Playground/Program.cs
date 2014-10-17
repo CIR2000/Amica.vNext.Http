@@ -9,6 +9,7 @@ namespace Playground
 		{
 			var rc = new RestClient ();
 			Console.WriteLine (rc.ToString());
+		    Console.ReadKey();
 		}
 	}
 }
