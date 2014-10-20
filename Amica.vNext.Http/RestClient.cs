@@ -20,15 +20,12 @@ namespace Amica.vNext.Http
 				client.DefaultRequestHeaders.Accept.Clear();
 				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-				HttpResponseMessage response = await client.GetAsync(string.Format("{0}/{1}", resourceName, documentId));
-				if (response.IsSuccessStatusCode)
-				{
-					var json = await response.Content.ReadAsStringAsync ();
-					T obj = JsonConvert.DeserializeObject<T>(json);
-					return obj;
-				}
+				var response = await client.GetAsync(string.Format("{0}/{1}", resourceName, documentId));
+			    if (!response.IsSuccessStatusCode) return default(T);
+			    var json = await response.Content.ReadAsStringAsync ();
+			    var obj = JsonConvert.DeserializeObject<T>(json);
+			    return obj;
 			}
-			return default(T);
 		}
 
 		public async Task<T> GetAsync<T>() {
