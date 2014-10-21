@@ -15,6 +15,17 @@ namespace Amica.vNext.Http
 		public RestClient (string baseAddress) : this (new Uri (baseAddress)) { }
 
 		public async Task<T> GetAsync<T>(string resourceName, string documentId) {
+
+			if (BaseAddress == null) {
+				throw new ArgumentNullException ("BaseAddress");
+			}
+			if (resourceName == null) {
+				throw new ArgumentNullException ("ResourceName");
+			}
+			if (documentId == null) {
+				throw new ArgumentNullException ("DocumentId");
+			}
+
 			using (var client = new HttpClient ()) {
 				client.BaseAddress = BaseAddress;
 				client.DefaultRequestHeaders.Accept.Clear();

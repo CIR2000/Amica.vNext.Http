@@ -25,7 +25,7 @@ namespace Playground
 //			Console.WriteLine (person.LastName);
 //			Console.WriteLine (person.FirstName);
 
-			rc.ResourceName = "people";
+//			rc.ResourceName = "people";
 			person = await rc.GetAsync<Person> ("54450894d71ddf000237ae8c");
 			Console.WriteLine (person.LastName);
 			Console.WriteLine (person.FirstName);
