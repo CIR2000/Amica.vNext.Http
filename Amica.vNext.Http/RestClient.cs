@@ -8,11 +8,17 @@ namespace Amica.vNext.Http
 {
     public class RestClient
     {
+		#region "I N I T"
+
 		public RestClient(Uri baseAddress)
 		{
 			BaseAddress = baseAddress;
 		}
 		public RestClient (string baseAddress) : this (new Uri (baseAddress)) { }
+
+		#endregion
+
+		#region "G E T"
 
 		public async Task<T> GetAsync<T>(string resourceName, string documentId) {
 
@@ -47,10 +53,15 @@ namespace Amica.vNext.Http
 		public async Task<T> GetAsync<T>(string documentId) {
 			return await GetAsync<T> (ResourceName, documentId);
 		}
+		#endregion
+
+		#region "P R O P R I E R T I E S"
 
 		public Uri BaseAddress { get; set; }
 		public string ResourceName { get; set; }
 		public string DocumentId { get; set; }
+
+		#endregion
     }
 
 
