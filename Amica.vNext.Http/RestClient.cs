@@ -21,7 +21,8 @@ namespace Amica.vNext.Http
 				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
 				var response = await client.GetAsync(string.Format("{0}/{1}", resourceName, documentId));
-			    if (!response.IsSuccessStatusCode) return default(T);
+				response.EnsureSuccessStatusCode ();
+
 			    var json = await response.Content.ReadAsStringAsync ();
 			    var obj = JsonConvert.DeserializeObject<T>(json);
 			    return obj;
