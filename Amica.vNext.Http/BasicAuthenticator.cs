@@ -29,14 +29,14 @@ namespace Amica.vNext.Http
 		public string Password { get; set;}
 
 		internal AuthenticationHeaderValue AuthenticationHeader() {
-			string s = string.Format("{0}:{1}", this.UserName.ToString(), Password.ToString());
+			var s = string.Format("{0}:{1}", UserName, Password);
 			return new AuthenticationHeaderValue ( "Basic", Convert.ToBase64String (ToAscii (s)));
 		}
 
 		private static byte[] ToAscii(string s) {
-	        byte[] r = new byte[s.Length];
-	        for (int ix = 0; ix < s.Length; ++ix) {
-	            char ch = s[ix];
+	        var r = new byte[s.Length];
+	        for (var ix = 0; ix < s.Length; ++ix) {
+	            var ch = s[ix];
 	            if (ch <= 0x7f) r[ix] = (byte)ch;
 	            else r[ix] = (byte)'?';
 	        }

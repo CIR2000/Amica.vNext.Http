@@ -54,14 +54,10 @@ namespace Amica.vNext.Http
 			using (var client = new HttpClient ()) {
 				SetClientSettings (client);
 				_httpResponse = await client.GetAsync(string.Format("{0}/{1}", resourceName, documentId));
-				if (_httpResponse.StatusCode == HttpStatusCode.OK) {
-					var json = await _httpResponse.Content.ReadAsStringAsync ();
-					var obj = JsonConvert.DeserializeObject<T> (json);
-					return obj;
-				}
-				else {
-					return default(T);
-				}
+			    if (_httpResponse.StatusCode != HttpStatusCode.OK) return default(T);
+			    var json = await _httpResponse.Content.ReadAsStringAsync ();
+			    var obj = JsonConvert.DeserializeObject<T> (json);
+			    return obj;
 			}
 		}
 
