@@ -30,13 +30,16 @@ namespace Playground
 		}
         static async Task RunAsync()
         {
-			var rc = new RestClient ("http://127.0.0.1:5000/");
+			BasicAuthenticator auth = new BasicAuthenticator ("token1", "");
+			var rc = new RestClient ("http://127.0.0.1:5000/", auth);
 
-			Person person;
+			Company company;
 
-//			person = await rc.GetAsync<Person> ("people", "54450894d71ddf000237ae8d");
-//			Console.WriteLine (person.LastName);
-//			Console.WriteLine (person.FirstName);
+//			company = await rc.GetAsync<Company> ("companies", "544767cb38345b4a6047ba41");
+//			if (company != null)
+//				Console.WriteLine (company.Name);
+//			else
+//				Console.WriteLine (rc.HttpResponse.StatusCode);
 
 //			rc.ResourceName = "people";
 //			person = await rc.GetAsync<Person> ("54450894d71ddf000237ae8c");
@@ -48,7 +51,7 @@ namespace Playground
 //			Console.WriteLine (person.LastName);
 //			Console.WriteLine (person.FirstName);
 
-			person = new Person {LastName = "Serena"};
+//			person = new Person {LastName = "Serena"};
 
 //			rc.ResourceName = "people";
 //			HttpResponseMessage r = await rc.PostAsync (person);
@@ -58,12 +61,11 @@ namespace Playground
 //			var s = await r.Content.ReadAsStringAsync ();
 //			Console.WriteLine (s);
 
-			Company company = new Company { Name = "nome", Password = "Password", CompanyId = 99 };
+			company = new Company { Name = "nome", Password = "Password", CompanyId = 100 };
 			Company c = await rc.PostAsync<Company> ("companies", company);
 			if (c != null)
 				Console.WriteLine (c.Name);
 			else {
-				Console.WriteLine ("null!");
 				Console.WriteLine (rc.HttpResponse.StatusCode);
 			}
 

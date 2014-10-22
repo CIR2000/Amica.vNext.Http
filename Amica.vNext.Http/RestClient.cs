@@ -12,16 +12,28 @@ namespace Amica.vNext.Http
 		#region "I N I T"
 
 		private HttpResponseMessage _httpResponse;
+		private BasicAuthenticator _basicAuthenticator;
 
-		public RestClient(Uri baseAddress)
-		{
-			BaseAddress = baseAddress;
+		public RestClient () {
 			JsonConvert.DefaultSettings = () => new JsonSerializerSettings { 
 				NullValueHandling = NullValueHandling.Ignore,
 			};
 		}
 
+		public RestClient(Uri baseAddress) :this () {
+			BaseAddress = baseAddress;
+		}
+
+
 		public RestClient (string baseAddress) : this (new Uri (baseAddress)) { }
+
+		public RestClient(string baseAddress, BasicAuthenticator authenticator) : this(baseAddress) {
+			BasicAuthenticator = authenticator;
+		}
+
+		public RestClient(Uri baseAddress, BasicAuthenticator authenticator) : this(baseAddress) {
+			BasicAuthenticator = authenticator;
+		}
 
 		#endregion
 
@@ -40,10 +52,7 @@ namespace Amica.vNext.Http
 			}
 
 			using (var client = new HttpClient ()) {
-				client.BaseAddress = BaseAddress;
-				client.DefaultRequestHeaders.Accept.Clear();
-				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+				SetClientSettings (client);
 				_httpResponse = await client.GetAsync(string.Format("{0}/{1}", resourceName, documentId));
 				if (_httpResponse.StatusCode == HttpStatusCode.OK) {
 					var json = await _httpResponse.Content.ReadAsStringAsync ();
@@ -80,7 +89,7 @@ namespace Amica.vNext.Http
 			content.Headers.ContentType = new MediaTypeHeaderValue ("application/json");
 
 			using (var client = new HttpClient ()) {
-				client.BaseAddress = BaseAddress;
+				SetClientSettings (client);
 				_httpResponse = await client.PostAsync (resourceName, content);
 				return _httpResponse;
 			}
@@ -114,7 +123,31 @@ namespace Amica.vNext.Http
 		public string DocumentId { get; set; }
 		public HttpResponseMessage HttpResponse{ get { return _httpResponse; } }
 
+		/// <summary>
+		/// Gets or sets the authenticator.
+		/// </summary>
+		/// <value>The authenticator.</value>
+		public BasicAuthenticator BasicAuthenticator {
+			get { return _basicAuthenticator; }
+			set { _basicAuthenticator = value; }
+		}
+
 		#endregion
+
+		#region "U T I L I T I E S"
+
+		private void SetClientSettings(HttpClient client) {
+			client.BaseAddress = BaseAddress;
+			client.DefaultRequestHeaders.Accept.Clear();
+			client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+			if (BasicAuthenticator != null) {
+				client.DefaultRequestHeaders.Authorization = BasicAuthenticator.AuthenticationHeader ();
+			}
+		}
+
+		#endregion
+
+
     }
 
 
