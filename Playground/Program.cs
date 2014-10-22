@@ -2,17 +2,31 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
 using Amica.vNext.Http;
 
 namespace Playground
 {
 	class Company {
+
+		[JsonProperty("_id")]
+		public string RemoteId { get; set; }
+
+		[JsonProperty("_etag")]
+		public string ETag { get; set; }
+
+		[JsonProperty("_updated")]
+		public DateTime? Updated { get; set; }
+
 		[JsonProperty("n")]
 		public string Name {get; set;}
+
 		[JsonProperty("p")]
 		public string Password { get; set; }
+
 		[JsonProperty("c")]
 		public int CompanyId { get; set; }
+
 	}
 
 	class Person {
@@ -61,7 +75,7 @@ namespace Playground
 //			var s = await r.Content.ReadAsStringAsync ();
 //			Console.WriteLine (s);
 
-			company = new Company { Name = "nome", Password = "Password", CompanyId = 100 };
+			company = new Company { Name = "nome", Password = "Password", CompanyId = 113};
 			Company c = await rc.PostAsync<Company> ("companies", company);
 			if (c != null)
 				Console.WriteLine (c.Name);

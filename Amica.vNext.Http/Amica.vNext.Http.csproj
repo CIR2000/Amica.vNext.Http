@@ -42,6 +42,7 @@
     <Compile Include="RestClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BasicAuthenticator.cs" />
+    <Compile Include="EveContractResolver.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.IO">

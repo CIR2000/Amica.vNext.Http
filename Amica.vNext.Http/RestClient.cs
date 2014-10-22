@@ -84,8 +84,8 @@ namespace Amica.vNext.Http
 			if (resourceName == null) {
 				throw new ArgumentNullException ("ResourceName");
 			}
-
-			var content = new StringContent(JsonConvert.SerializeObject(value));
+			var settings = new JsonSerializerSettings { ContractResolver = new EveContractResolver () };
+			var content = new StringContent(JsonConvert.SerializeObject(value, settings));
 			content.Headers.ContentType = new MediaTypeHeaderValue ("application/json");
 
 			using (var client = new HttpClient ()) {
