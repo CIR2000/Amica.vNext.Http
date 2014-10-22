@@ -6,6 +6,15 @@ using Amica.vNext.Http;
 
 namespace Playground
 {
+	class Company {
+		[JsonProperty("n")]
+		public string Name {get; set;}
+		[JsonProperty("p")]
+		public string Password { get; set; }
+		[JsonProperty("c")]
+		public int CompanyId { get; set; }
+	}
+
 	class Person {
 		[JsonProperty("lastname")]
 		public string LastName { get; set; }
@@ -44,11 +53,19 @@ namespace Playground
 //			rc.ResourceName = "people";
 //			HttpResponseMessage r = await rc.PostAsync (person);
 
-			HttpResponseMessage r = await rc.PostAsync ("people", person);
-			Console.WriteLine (r.StatusCode);
+//			HttpResponseMessage r = await rc.PostAsync ("people", person);
+//			Console.WriteLine (r.StatusCode);
+//			var s = await r.Content.ReadAsStringAsync ();
+//			Console.WriteLine (s);
 
-			var s = await r.Content.ReadAsStringAsync ();
-			Console.WriteLine (s);
+			Company company = new Company { Name = "nome", Password = "Password", CompanyId = 99 };
+			Company c = await rc.PostAsync<Company> ("companies", company);
+			if (c != null)
+				Console.WriteLine (c.Name);
+			else {
+				Console.WriteLine ("null!");
+				Console.WriteLine (rc.HttpResponse.StatusCode);
+			}
 
 
 	  }

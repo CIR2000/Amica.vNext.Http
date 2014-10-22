@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -9,6 +10,8 @@ namespace Amica.vNext.Http
     public class RestClient
     {
 		#region "I N I T"
+
+		private HttpResponseMessage _httpResponse;
 
 		public RestClient(Uri baseAddress)
 		{
@@ -41,12 +44,15 @@ namespace Amica.vNext.Http
 				client.DefaultRequestHeaders.Accept.Clear();
 				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-				var response = await client.GetAsync(string.Format("{0}/{1}", resourceName, documentId));
-				response.EnsureSuccessStatusCode ();
-
-			    var json = await response.Content.ReadAsStringAsync ();
-			    var obj = JsonConvert.DeserializeObject<T>(json);
-			    return obj;
+				_httpResponse = await client.GetAsync(string.Format("{0}/{1}", resourceName, documentId));
+				if (_httpResponse.StatusCode == HttpStatusCode.OK) {
+					var json = await _httpResponse.Content.ReadAsStringAsync ();
+					var obj = JsonConvert.DeserializeObject<T> (json);
+					return obj;
+				}
+				else {
+					return default(T);
+				}
 			}
 		}
 
@@ -75,14 +81,30 @@ namespace Amica.vNext.Http
 
 			using (var client = new HttpClient ()) {
 				client.BaseAddress = BaseAddress;
-				var response = await client.PostAsync (resourceName, content);
-				return response;
+				_httpResponse = await client.PostAsync (resourceName, content);
+				return _httpResponse;
 			}
 		}
 		public async Task<HttpResponseMessage> PostAsync(object value) {
 			return await PostAsync (ResourceName, value);
 		}
 
+		public async Task<T> PostAsync<T>(string resourceName, object value) {
+			_httpResponse = await PostAsync (resourceName, value);
+
+			switch (_httpResponse.StatusCode) {
+			case HttpStatusCode.Created:
+				var s = await _httpResponse.Content.ReadAsStringAsync ();
+				T obj = JsonConvert.DeserializeObject<T> (s);
+				return obj;
+			default:
+				return default(T);
+			}
+		}
+
+		public async Task<T> PostAsync<T>(object value) {
+			return await PostAsync<T> (ResourceName, value);
+		}
 		#endregion
 
 		#region "P R O P R I E R T I E S"
@@ -90,6 +112,7 @@ namespace Amica.vNext.Http
 		public Uri BaseAddress { get; set; }
 		public string ResourceName { get; set; }
 		public string DocumentId { get; set; }
+		public HttpResponseMessage HttpResponse{ get { return _httpResponse; } }
 
 		#endregion
     }
