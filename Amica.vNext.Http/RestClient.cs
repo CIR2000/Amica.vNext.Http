@@ -42,14 +42,12 @@ namespace Amica.vNext.Http
 
 		public async Task<T> GetAsync<T>(string resourceName, string documentId) {
 
-			if (BaseAddress == null) {
-				throw new ArgumentNullException ("BaseAddress");
-			}
+			ValidateBaseAddress ();
 			if (resourceName == null) {
-				throw new ArgumentNullException ("ResourceName");
+				throw new ArgumentNullException ("resourceName");
 			}
 			if (documentId == null) {
-				throw new ArgumentNullException ("DocumentId");
+				throw new ArgumentNullException ("documentId");
 			}
 
 			using (var client = new HttpClient ()) {
@@ -63,31 +61,38 @@ namespace Amica.vNext.Http
 		}
 
 		public async Task<T> GetAsync<T>() {
+			ValidateResourceName ();
+			ValidateDocumentId ();
 			return await GetAsync<T> (ResourceName, DocumentId);
 		}
 
 		public async Task<T> GetAsync<T>(string documentId) {
+			ValidateDocumentId ();
 			return await GetAsync<T> (ResourceName, documentId);
 		}
+
 		#endregion
 
 		#region "P O S T"
 
 		public async Task<HttpResponseMessage> PostAsync(string resourceName, object value) {
-
-			if (BaseAddress == null) {
-				throw new ArgumentNullException ("BaseAddress");
-			}
+			ValidateBaseAddress ();
 			if (resourceName == null) {
-				throw new ArgumentNullException ("ResourceName");
+				throw new ArgumentNullException ("resourceName");
 			}
+			if (value == null) {
+				throw new ArgumentNullException ("value");
+			}
+
 			using (var client = new HttpClient ()) {
 				SetSettings (client);
 				_httpResponse = await client.PostAsync (resourceName, GetContent(value));
 				return _httpResponse;
 			}
 		}
+
 		public async Task<HttpResponseMessage> PostAsync(object value) {
+			ValidateResourceName ();
 			return await PostAsync (ResourceName, value);
 		}
 
@@ -105,6 +110,7 @@ namespace Amica.vNext.Http
 		}
 
 		public async Task<T> PostAsync<T>(object value) {
+			ValidateResourceName ();
 			return await PostAsync<T> (ResourceName, value);
 		}
 		#endregion
@@ -112,11 +118,9 @@ namespace Amica.vNext.Http
 		#region "P U T"
 		public async Task<HttpResponseMessage> PutAsync(string resourceName, object value) {
 
-			if (BaseAddress == null) {
-				throw new ArgumentNullException ("BaseAddress");
-			}
+			ValidateBaseAddress ();
 			if (resourceName == null) {
-				throw new ArgumentNullException ("ResourceName");
+				throw new ArgumentNullException ("resourceName");
 			}
 			if (value == null) {
 				throw new ArgumentNullException ("value");
@@ -147,6 +151,7 @@ namespace Amica.vNext.Http
 		}
 
 		public async Task<T> PutAsync<T>(object value) {
+			ValidateResourceName ();
 			return await PutAsync<T> (ResourceName, value);
 		}
 
@@ -156,9 +161,7 @@ namespace Amica.vNext.Http
 
 		public async Task<HttpResponseMessage> DeleteAsync(string resourceName, object value) {
 
-			if (BaseAddress == null) {
-				throw new ArgumentNullException ("BaseAddress");
-			}
+			ValidateBaseAddress ();
 			if (resourceName == null) {
 				throw new ArgumentNullException ("ResourceName");
 			}
@@ -174,6 +177,7 @@ namespace Amica.vNext.Http
 		}
 
 		public async Task<HttpResponseMessage> DeleteAsync(object value) {
+			ValidateResourceName ();
 			_httpResponse = await DeleteAsync (ResourceName, value);
 			return _httpResponse;
 		}
@@ -251,6 +255,29 @@ namespace Amica.vNext.Http
 			return v.ToString ();
 		}
 
+		private void ValidateResourceName() {
+			if (ResourceName == null) {
+				throw new ArgumentNullException ("ResourceName");
+			}
+			if (ResourceName == string.Empty) {
+				throw new ArgumentException ("ResourceName cannot be empty.");
+			}
+		}
+
+		private void ValidateDocumentId() {
+			if (DocumentId == null) {
+				throw new ArgumentNullException ("DocumentId");
+			}
+			if (DocumentId == string.Empty) {
+				throw new ArgumentException ("DocumentId cannot be empty.");
+			}
+		}
+
+		private void ValidateBaseAddress() {
+			if (BaseAddress == null) {
+				throw new ArgumentNullException ("BaseAddress");
+			}
+		}
 		#endregion
 
 
