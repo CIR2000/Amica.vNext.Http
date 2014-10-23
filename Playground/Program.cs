@@ -29,13 +29,6 @@ namespace Playground
 
 	}
 
-	class Person {
-		[JsonProperty("lastname")]
-		public string LastName { get; set; }
-		[JsonProperty("firstname")]
-		public string FirstName { get; set; }
-	}
-
 	class MainClass
 	{
 		public static void Main (string[] args)
@@ -49,12 +42,15 @@ namespace Playground
 
 			Company company;
 
-//			company = await rc.GetAsync<Company> ("companies", "544767cb38345b4a6047ba41");
-//			if (company != null)
-//				Console.WriteLine (company.Name);
-//			else
-//				Console.WriteLine (rc.HttpResponse.StatusCode);
-
+			company = await rc.GetAsync<Company> ("companies", "544767cb38345b4a6047ba41");
+			if (company != null)
+				Console.WriteLine (company.Name);
+			else
+				Console.WriteLine (rc.HttpResponse.StatusCode);
+			rc.ResourceName = "companies";
+			company.Name = "mynewname";
+			company = await rc.PutAsync<Company>(company);
+			Console.WriteLine (rc.HttpResponse.StatusCode);
 //			rc.ResourceName = "people";
 //			person = await rc.GetAsync<Person> ("54450894d71ddf000237ae8c");
 //			Console.WriteLine (person.LastName);
@@ -75,13 +71,13 @@ namespace Playground
 //			var s = await r.Content.ReadAsStringAsync ();
 //			Console.WriteLine (s);
 
-			company = new Company { Name = "nome", Password = "Password", CompanyId = 113};
-			Company c = await rc.PostAsync<Company> ("companies", company);
-			if (c != null)
-				Console.WriteLine (c.Name);
-			else {
-				Console.WriteLine (rc.HttpResponse.StatusCode);
-			}
+//			company = new Company { Name = "nome", Password = "Password", CompanyId = 113};
+//			Company c = await rc.PostAsync<Company> ("companies", company);
+//			if (c != null)
+//				Console.WriteLine (c.Name);
+//			else {
+//				Console.WriteLine (rc.HttpResponse.StatusCode);
+//			}
 
 
 	  }

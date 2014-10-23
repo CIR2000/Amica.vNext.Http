@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace Amica.vNext.Http
@@ -52,7 +53,7 @@ namespace Amica.vNext.Http
 			}
 
 			using (var client = new HttpClient ()) {
-				SetClientSettings (client);
+				SetSettings (client);
 				_httpResponse = await client.GetAsync(string.Format("{0}/{1}", resourceName, documentId));
 			    if (_httpResponse.StatusCode != HttpStatusCode.OK) return default(T);
 			    var json = await _httpResponse.Content.ReadAsStringAsync ();
@@ -80,13 +81,9 @@ namespace Amica.vNext.Http
 			if (resourceName == null) {
 				throw new ArgumentNullException ("ResourceName");
 			}
-			var settings = new JsonSerializerSettings { ContractResolver = new EveContractResolver () };
-			var content = new StringContent(JsonConvert.SerializeObject(value, settings));
-			content.Headers.ContentType = new MediaTypeHeaderValue ("application/json");
-
 			using (var client = new HttpClient ()) {
-				SetClientSettings (client);
-				_httpResponse = await client.PostAsync (resourceName, content);
+				SetSettings (client);
+				_httpResponse = await client.PostAsync (resourceName, GetContent(value));
 				return _httpResponse;
 			}
 		}
@@ -112,6 +109,49 @@ namespace Amica.vNext.Http
 		}
 		#endregion
 
+		#region "P U T"
+		public async Task<HttpResponseMessage> PutAsync(string resourceName, object value) {
+
+			if (BaseAddress == null) {
+				throw new ArgumentNullException ("BaseAddress");
+			}
+			if (resourceName == null) {
+				throw new ArgumentNullException ("ResourceName");
+			}
+			if (value == null) {
+				throw new ArgumentNullException ("value");
+			}
+
+			using (var client = new HttpClient ()) {
+				SetSettings (client, value);
+				_httpResponse = await client.PutAsync(string.Format("{0}/{1}", resourceName, GetRemoteId(value)), GetContent(value));
+				return _httpResponse;
+			}
+		}
+
+		public async Task<HttpResponseMessage> PutAsync(object value) {
+			return await PutAsync (ResourceName, value);
+		}
+
+		public async Task<T> PutAsync<T>(string resourceName, object value) {
+			_httpResponse = await PutAsync (resourceName, value);
+
+			switch (_httpResponse.StatusCode) {
+			case HttpStatusCode.OK:
+				var s = await _httpResponse.Content.ReadAsStringAsync ();
+				T obj = JsonConvert.DeserializeObject<T> (s);
+				return obj;
+			default:
+				return default(T);
+			}
+		}
+
+		public async Task<T> PutAsync<T>(object value) {
+			return await PutAsync<T> (ResourceName, value);
+		}
+
+		#endregion
+
 		#region "P R O P R I E R T I E S"
 
 		public Uri BaseAddress { get; set; }
@@ -132,13 +172,55 @@ namespace Amica.vNext.Http
 
 		#region "U T I L I T I E S"
 
-		private void SetClientSettings(HttpClient client) {
+		private void SetSettings(HttpClient client) {
 			client.BaseAddress = BaseAddress;
 			client.DefaultRequestHeaders.Accept.Clear();
 			client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 			if (BasicAuthenticator != null) {
 				client.DefaultRequestHeaders.Authorization = BasicAuthenticator.AuthenticationHeader ();
 			}
+
+		}
+
+		private void SetSettings (HttpClient client, object value) {
+			SetSettings (client);
+
+			// TODO use maybe reflection or custom attribute to know which property stands for etag field
+			// instead of hardcoding it.
+			PropertyInfo info = value.GetType ().GetProperty ("ETag");
+			if (info == null) {
+				// TODO explicit exception, also see TODO above.
+				throw new Exception ("Etag property not found.");
+			}
+			var etag = info.GetValue (value, null);
+			if (etag == null) {
+				// TODO explicit exception, also see TODO above.
+				throw new Exception ("Etag value cannot be nulla when doing an edit operation.");
+			}
+			client.DefaultRequestHeaders.TryAddWithoutValidation ("If-Match", etag.ToString());
+		}
+
+		private StringContent GetContent(object value) {
+			var settings = new JsonSerializerSettings { ContractResolver = new EveContractResolver () };
+			var content = new StringContent (JsonConvert.SerializeObject (value, settings));
+			content.Headers.ContentType = new MediaTypeHeaderValue ("application/json");
+			return content;
+		}
+
+		private string GetRemoteId(object value) {
+			// TODO use maybe reflection or custom attribute to know which property stands for API unique id
+			// instead of hardcoding it.
+			PropertyInfo info = value.GetType ().GetProperty ("RemoteId");
+			if (info == null) {
+				// TODO explicit exception, also see TODO above.
+				throw new Exception("RemoteId property not found.");
+			}
+			var v = info.GetValue (value, null);
+			if (v == null) {
+				// TODO explicit exception, also see TODO above.
+				throw new Exception ("RemoteId value cannot be null when doing an edit operation.");
+			}
+			return v.ToString ();
 		}
 
 		#endregion
