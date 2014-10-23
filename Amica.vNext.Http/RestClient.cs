@@ -152,6 +152,34 @@ namespace Amica.vNext.Http
 
 		#endregion
 
+		#region "D E L E T E"
+
+		public async Task<HttpResponseMessage> DeleteAsync(string resourceName, object value) {
+
+			if (BaseAddress == null) {
+				throw new ArgumentNullException ("BaseAddress");
+			}
+			if (resourceName == null) {
+				throw new ArgumentNullException ("ResourceName");
+			}
+			if (value == null) {
+				throw new ArgumentNullException ("value");
+			}
+
+			using (var client = new HttpClient ()) {
+				SetSettings (client, value);
+				_httpResponse = await client.DeleteAsync (string.Format ("{0}/{1}", resourceName, GetRemoteId (value)));
+				return _httpResponse;
+			}
+		}
+
+		public async Task<HttpResponseMessage> DeleteAsync(object value) {
+			_httpResponse = await DeleteAsync (ResourceName, value);
+			return _httpResponse;
+		}
+			
+		#endregion
+
 		#region "P R O P R I E R T I E S"
 
 		public Uri BaseAddress { get; set; }
@@ -170,7 +198,7 @@ namespace Amica.vNext.Http
 
 		#endregion
 
-		#region "U T I L I T I E S"
+		#region "S U P P O R T"
 
 		private void SetSettings(HttpClient client) {
 			client.BaseAddress = BaseAddress;

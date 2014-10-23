@@ -48,8 +48,8 @@ namespace Playground
 			else
 				Console.WriteLine (rc.HttpResponse.StatusCode);
 			rc.ResourceName = "companies";
-			company.Name = "mynewname";
-			company = await rc.PutAsync<Company>(company);
+//			company.Name = "mynewname";
+			await rc.DeleteAsync(company);
 			Console.WriteLine (rc.HttpResponse.StatusCode);
 //			rc.ResourceName = "people";
 //			person = await rc.GetAsync<Person> ("54450894d71ddf000237ae8c");
