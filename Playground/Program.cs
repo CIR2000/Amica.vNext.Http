@@ -42,18 +42,20 @@ namespace Playground
 
 			Company company;
 
-			company = await rc.GetAsync<Company> ("companies", "544767cb38345b4a6047ba41");
+			company = await rc.GetAsync<Company> ("companies", "5200f31a38345bd591e06842");
 			if (company != null)
 				Console.WriteLine (company.Name);
 			else
 				Console.WriteLine (rc.HttpResponse.StatusCode);
 			rc.ResourceName = "companies";
 //			company.Name = "mynewname";
-			await rc.DeleteAsync(company);
-			Console.WriteLine (rc.HttpResponse.StatusCode);
+//			await rc.DeleteAsync(company);
+//			Console.WriteLine (rc.HttpResponse.StatusCode);
 //			rc.ResourceName = "people";
-//			person = await rc.GetAsync<Person> ("54450894d71ddf000237ae8c");
-//			Console.WriteLine (person.LastName);
+			Company c = await rc.GetAsync<Company> ("companies", company);
+			Console.WriteLine (c.Name);
+
+			//			Console.WriteLine (person.LastName);
 //			Console.WriteLine (person.FirstName);
 
 //			rc.DocumentId = "54450894d71ddf000237ae8e";

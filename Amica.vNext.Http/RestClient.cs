@@ -71,6 +71,31 @@ namespace Amica.vNext.Http
 			return await GetAsync<T> (ResourceName, documentId);
 		}
 
+		public async Task<T> GetAsync<T>(object value) {
+			ValidateResourceName ();
+			if (value == null) {
+				throw new ArgumentNullException ("value");
+			}
+
+			var documentId = GetRemoteId (value);
+			return await GetAsync<T> (ResourceName, documentId);
+		}
+
+		public async Task<T> GetAsync<T>(string resourceName, object value) {
+			if (resourceName == null) {
+				throw new ArgumentNullException ("resourceName");
+			}
+			if (resourceName == string.Empty) {
+				throw new ArgumentException ("resourceName cannot be empty.");
+			}
+			if (value == null) {
+				throw new ArgumentNullException ("value");
+			}
+
+			var documentId = GetRemoteId (value);
+			return await GetAsync<T> (ResourceName, documentId);
+		}
+
 		#endregion
 
 		#region "P O S T"
