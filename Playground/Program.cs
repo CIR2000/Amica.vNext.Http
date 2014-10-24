@@ -7,24 +7,29 @@ using Amica.vNext.Http;
 
 namespace Playground
 {
-	class Company {
+	class Company
+	{
 
-		[JsonProperty("_id")]
+
+		[JsonProperty ("_id")][Remote (Meta.DocumentId)]
 		public string RemoteId { get; set; }
 
-		[JsonProperty("_etag")]
+		[JsonProperty ("_etag")][Remote (Meta.ETag)]
 		public string ETag { get; set; }
 
-		[JsonProperty("_updated")]
+		[JsonProperty ("_updated")][Remote (Meta.LastUpdated)]
 		public DateTime? Updated { get; set; }
 
-		[JsonProperty("n")]
-		public string Name {get; set;}
+		[JsonProperty ("_created")][Remote (Meta.DateCreated)]
+		public DateTime? Created { get; set; }
 
-		[JsonProperty("p")]
+		[JsonProperty ("n")]
+		public string Name { get; set; }
+
+		[JsonProperty ("p")]
 		public string Password { get; set; }
 
-		[JsonProperty("c")]
+		[JsonProperty ("c")]
 		public int CompanyId { get; set; }
 
 	}
@@ -35,8 +40,9 @@ namespace Playground
 		{
 			RunAsync ().Wait ();
 		}
-        static async Task RunAsync()
-        {
+
+		static async Task RunAsync ()
+		{
 			BasicAuthenticator auth = new BasicAuthenticator ("token1", "");
 			var rc = new RestClient ("http://127.0.0.1:5000/", auth);
 
@@ -48,32 +54,18 @@ namespace Playground
 			else
 				Console.WriteLine (rc.HttpResponse.StatusCode);
 			rc.ResourceName = "companies";
-//			company.Name = "mynewname";
-//			await rc.DeleteAsync(company);
-//			Console.WriteLine (rc.HttpResponse.StatusCode);
-//			rc.ResourceName = "people";
-			Company c = await rc.GetAsync<Company> ("companies", company);
-			Console.WriteLine (c.Name);
-
-			//			Console.WriteLine (person.LastName);
-//			Console.WriteLine (person.FirstName);
-
-//			rc.DocumentId = "54450894d71ddf000237ae8e";
-//			person = await rc.GetAsync<Person> ();
-//			Console.WriteLine (person.LastName);
-//			Console.WriteLine (person.FirstName);
-
-//			person = new Person {LastName = "Serena"};
-
-//			rc.ResourceName = "people";
-//			HttpResponseMessage r = await rc.PostAsync (person);
+			company.Name = "exmynewname";
+			await rc.PutAsync (company);
+			Console.WriteLine (rc.HttpResponse.StatusCode);
+//			Company c = await rc.GetAsync<Company> ("companies", company);
+//			Console.WriteLine (c.Name);
 
 //			HttpResponseMessage r = await rc.PostAsync ("people", person);
 //			Console.WriteLine (r.StatusCode);
 //			var s = await r.Content.ReadAsStringAsync ();
 //			Console.WriteLine (s);
 
-//			company = new Company { Name = "nome", Password = "Password", CompanyId = 113};
+//			company = new Company { Name = "nome", Password = "Password", CompanyId = 98, RemoteId = "113"};
 //			Company c = await rc.PostAsync<Company> ("companies", company);
 //			if (c != null)
 //				Console.WriteLine (c.Name);
@@ -82,6 +74,6 @@ namespace Playground
 //			}
 
 
-	  }
+		}
 	}
 }

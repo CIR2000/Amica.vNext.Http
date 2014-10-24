@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
@@ -11,13 +12,16 @@ namespace Amica.vNext.Http
 	/// </summary>
 	public class EveContractResolver : DefaultContractResolver
 	{
-		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization) {
-			var properties = base.CreateProperties(type, memberSerialization);
+		protected override JsonProperty CreateProperty (MemberInfo member, MemberSerialization memberSerialization)
+		{
+			JsonProperty property =	base.CreateProperty (member, memberSerialization);
+			property.ShouldSerialize = 
+				instance => {
+				var r = member.GetCustomAttributes (typeof(RemoteAttribute), false);
+				return r.Length == 0;
+			};
 
-	        // only serializer properties that start with the specified character
-			properties = properties.Where(p => !p.PropertyName.StartsWith("_")).ToList();
-
-			return properties;
+			return property;
 		}
 	}
 }
