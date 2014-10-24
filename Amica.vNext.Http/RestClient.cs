@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Reflection;
 using Newtonsoft.Json;
 
 namespace Amica.vNext.Http
@@ -126,7 +125,7 @@ namespace Amica.vNext.Http
 		{
 			ValidateResourceName ();
 			if (obj == null) {
-				throw new ArgumentNullException ("value");
+				throw new ArgumentNullException ("obj");
 			}
 
 			return await GetAsync<T> (ResourceName, GetDocumentId (obj));
@@ -148,7 +147,7 @@ namespace Amica.vNext.Http
 				throw new ArgumentException ("resourceName cannot be empty.");
 			}
 			if (obj == null) {
-				throw new ArgumentNullException ("value");
+				throw new ArgumentNullException ("obj");
 			}
 
 			return await GetAsync<T> (ResourceName, GetDocumentId (obj));
@@ -171,7 +170,7 @@ namespace Amica.vNext.Http
 				throw new ArgumentNullException ("resourceName");
 			}
 			if (obj == null) {
-				throw new ArgumentNullException ("value");
+				throw new ArgumentNullException ("obj");
 			}
 
 			using (var client = new HttpClient ()) {
@@ -243,7 +242,7 @@ namespace Amica.vNext.Http
 				throw new ArgumentNullException ("resourceName");
 			}
 			if (obj == null) {
-				throw new ArgumentNullException ("value");
+				throw new ArgumentNullException ("obj");
 			}
 
 			using (var client = new HttpClient ()) {
@@ -311,10 +310,10 @@ namespace Amica.vNext.Http
 
 			ValidateBaseAddress ();
 			if (resourceName == null) {
-				throw new ArgumentNullException ("ResourceName");
+				throw new ArgumentNullException ("resourceName");
 			}
 			if (obj == null) {
-				throw new ArgumentNullException ("value");
+				throw new ArgumentNullException ("obj");
 			}
 
 			using (var client = new HttpClient ()) {
@@ -471,6 +470,7 @@ namespace Amica.vNext.Http
 		private void ValidateResourceName ()
 		{
 			if (ResourceName == null) {
+                // ReSharper disable once NotResolvedInText
 				throw new ArgumentNullException ("ResourceName");
 			}
 			if (ResourceName == string.Empty) {
@@ -484,6 +484,7 @@ namespace Amica.vNext.Http
 		private void ValidateDocumentId ()
 		{
 			if (DocumentId == null) {
+                // ReSharper disable once NotResolvedInText
 				throw new ArgumentNullException ("DocumentId");
 			}
 			if (DocumentId == string.Empty) {
@@ -497,6 +498,7 @@ namespace Amica.vNext.Http
 		private void ValidateBaseAddress ()
 		{
 			if (BaseAddress == null) {
+                // ReSharper disable once NotResolvedInText
 				throw new ArgumentNullException ("BaseAddress");
 			}
 		}
