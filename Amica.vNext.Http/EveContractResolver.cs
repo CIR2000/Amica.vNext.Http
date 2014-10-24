@@ -8,13 +8,14 @@ using Newtonsoft.Json.Serialization;
 namespace Amica.vNext.Http
 {
 	/// <summary>
-	/// Eve contract resolver. Does not serialize Eve meta fields (which are read only for the API)
+	/// Does not serialize remote (Eve) meta fields (which are read only for the API)
 	/// </summary>
 	public class EveContractResolver : DefaultContractResolver
 	{
 		protected override JsonProperty CreateProperty (MemberInfo member, MemberSerialization memberSerialization)
 		{
 			JsonProperty property =	base.CreateProperty (member, memberSerialization);
+			// if the property is flagged with the RemoteAttribute it's a meta field, so don't serialize it.
 			property.ShouldSerialize = 
 				instance => {
 				var r = member.GetCustomAttributes (typeof(RemoteAttribute), false);

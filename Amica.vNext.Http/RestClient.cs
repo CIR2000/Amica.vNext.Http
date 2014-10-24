@@ -18,6 +18,7 @@ namespace Amica.vNext.Http
 
 		public RestClient ()
 		{
+			// don't serialize null values.
 			JsonConvert.DefaultSettings = () => new JsonSerializerSettings { 
 				NullValueHandling = NullValueHandling.Ignore,
 			};
@@ -47,7 +48,13 @@ namespace Amica.vNext.Http
 
 		#region "G E T"
 
-		public async Task<T> GetAsync<T> (string resourceName, string documentId)
+		/// <summary>
+		/// Perform an asynchronous GET request on a document endpoint. 
+		/// </summary>
+		/// <returns>The raw response returned by the service.</returns>
+		/// <param name="resourceName">Resource name.</param>
+		/// <param name="documentId">Document identifier.</param>
+		public async Task<HttpResponseMessage> GetAsync (string resourceName, string documentId)
 		{
 
 			ValidateBaseAddress ();
@@ -61,14 +68,35 @@ namespace Amica.vNext.Http
 			using (var client = new HttpClient ()) {
 				SetSettings (client);
 				_httpResponse = await client.GetAsync (string.Format ("{0}/{1}", resourceName, documentId));
-				if (_httpResponse.StatusCode != HttpStatusCode.OK)
-					return default(T);
-				var json = await _httpResponse.Content.ReadAsStringAsync ();
-				var obj = JsonConvert.DeserializeObject<T> (json);
-				return obj;
+				return _httpResponse;
 			}
+
 		}
 
+		/// <summary>
+		/// Performs an asynchronous GET request on a documet endpoint.
+		/// </summary>
+		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <param name="resourceName">Resource name.</param>
+		/// <param name="documentId">Document identifier.</param>
+		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
+		public async Task<T> GetAsync<T> (string resourceName, string documentId)
+		{
+
+			_httpResponse = await GetAsync (resourceName, documentId);
+
+			if (_httpResponse.StatusCode != HttpStatusCode.OK)
+				return default(T);
+			var json = await _httpResponse.Content.ReadAsStringAsync ();
+			var obj = JsonConvert.DeserializeObject<T> (json);
+			return obj;
+		}
+
+		/// <summary>
+		/// Performs an asynchronous GET request on a documet endpoint.
+		/// </summary>
+		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
 		public async Task<T> GetAsync<T> ()
 		{
 			ValidateResourceName ();
@@ -76,23 +104,42 @@ namespace Amica.vNext.Http
 			return await GetAsync<T> (ResourceName, DocumentId);
 		}
 
+		/// <summary>
+		/// Performs an asynchronous GET request on a documet endpoint.
+		/// </summary>
+		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <param name="documentId">Document identifier.</param>
+		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
 		public async Task<T> GetAsync<T> (string documentId)
 		{
 			ValidateDocumentId ();
 			return await GetAsync<T> (ResourceName, documentId);
 		}
 
-		public async Task<T> GetAsync<T> (object value)
+		/// <summary>
+		/// Performs an asynchronous GET request on a document endpoint.
+		/// </summary>
+		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <param name="obj">The instance of the document to be retrieved.</param>
+		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
+		public async Task<T> GetAsync<T> (object obj)
 		{
 			ValidateResourceName ();
-			if (value == null) {
+			if (obj == null) {
 				throw new ArgumentNullException ("value");
 			}
 
-			return await GetAsync<T> (ResourceName, GetDocumentId (value));
+			return await GetAsync<T> (ResourceName, GetDocumentId (obj));
 		}
 
-		public async Task<T> GetAsync<T> (string resourceName, object value)
+		/// <summary>
+		/// Performs an asynchronous GET request on a document endpoint.
+		/// </summary>
+		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <param name="resourceName">The resource name.</param>
+		/// <param name="obj">The instance of the document to be retrieved.</param>
+		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
+		public async Task<T> GetAsync<T> (string resourceName, object obj)
 		{
 			if (resourceName == null) {
 				throw new ArgumentNullException ("resourceName");
@@ -100,133 +147,192 @@ namespace Amica.vNext.Http
 			if (resourceName == string.Empty) {
 				throw new ArgumentException ("resourceName cannot be empty.");
 			}
-			if (value == null) {
+			if (obj == null) {
 				throw new ArgumentNullException ("value");
 			}
 
-			return await GetAsync<T> (ResourceName, GetDocumentId (value));
+			return await GetAsync<T> (ResourceName, GetDocumentId (obj));
 		}
 
 		#endregion
 
 		#region "P O S T"
 
-		public async Task<HttpResponseMessage> PostAsync (string resourceName, object value)
+		/// <summary>
+		/// Performs an asynchronous POST request on a resource endpoint.
+		/// </summary>
+		/// <returns>The raw response returned by the service.</returns>
+		/// <param name="resourceName">Resource name.</param>
+		/// <param name="obj">Object to be stored.</param>
+		public async Task<HttpResponseMessage> PostAsync (string resourceName, object obj)
 		{
 			ValidateBaseAddress ();
 			if (resourceName == null) {
 				throw new ArgumentNullException ("resourceName");
 			}
-			if (value == null) {
+			if (obj == null) {
 				throw new ArgumentNullException ("value");
 			}
 
 			using (var client = new HttpClient ()) {
 				SetSettings (client);
-				_httpResponse = await client.PostAsync (resourceName, GetContent (value));
+				_httpResponse = await client.PostAsync (resourceName, SerializeObject (obj));
 				return _httpResponse;
 			}
 		}
 
-		public async Task<HttpResponseMessage> PostAsync (object value)
+		/// <summary>
+		/// Performs an asynchronous POST request on a resource endpoint.
+		/// </summary>
+		/// <returns>The raw response returned by the service.</returns>
+		/// <param name="obj">Object to be stored.</param>
+		public async Task<HttpResponseMessage> PostAsync (object obj)
 		{
 			ValidateResourceName ();
-			return await PostAsync (ResourceName, value);
+			return await PostAsync (ResourceName, obj);
 		}
 
-		public async Task<T> PostAsync<T> (string resourceName, object value)
+		/// <summary>
+		/// Performs an asynchronous POST request on a resource endpoint.
+		/// </summary>
+		/// <returns>An instance of the document.</returns>
+		/// <param name="resourceName">Resource name.</param>
+		/// <param name="obj">Object to be stored on the service.</param>
+		/// <typeparam name="T">Type of the document.</typeparam>
+		public async Task<T> PostAsync<T> (string resourceName, object obj)
 		{
-			_httpResponse = await PostAsync (resourceName, value);
+			_httpResponse = await PostAsync (resourceName, obj);
 
 			switch (_httpResponse.StatusCode) {
 			case HttpStatusCode.Created:
 				var s = await _httpResponse.Content.ReadAsStringAsync ();
-				T obj = JsonConvert.DeserializeObject<T> (s);
-				return obj;
+				T instance = JsonConvert.DeserializeObject<T> (s);
+				return instance;
 			default:
 				return default(T);
 			}
 		}
 
-		public async Task<T> PostAsync<T> (object value)
+		/// <summary>
+		/// Performs an asynchronous POST request on a resource endpoint.
+		/// </summary>
+		/// <returns>An instance of the document.</returns>
+		/// <param name="obj">Object to be stored on the service.</param>
+		/// <typeparam name="T">Type of the document.</typeparam>
+		public async Task<T> PostAsync<T> (object obj)
 		{
 			ValidateResourceName ();
-			return await PostAsync<T> (ResourceName, value);
+			return await PostAsync<T> (ResourceName, obj);
 		}
 
 		#endregion
 
 		#region "P U T"
 
-		public async Task<HttpResponseMessage> PutAsync (string resourceName, object value)
+		/// <summary>
+		/// Performs an asynchronous PUT request on a document endpoint.
+		/// </summary>
+		/// <returns>The raw response returned by the the servce.</returns>
+		/// <param name="resourceName">Resource name.</param>
+		/// <param name="obj">Object to be stored on the service.</param>
+		public async Task<HttpResponseMessage> PutAsync (string resourceName, object obj)
 		{
 
 			ValidateBaseAddress ();
 			if (resourceName == null) {
 				throw new ArgumentNullException ("resourceName");
 			}
-			if (value == null) {
+			if (obj == null) {
 				throw new ArgumentNullException ("value");
 			}
 
 			using (var client = new HttpClient ()) {
-				SetSettings (client, value);
-				_httpResponse = await client.PutAsync (string.Format ("{0}/{1}", resourceName, GetDocumentId (value)), GetContent (value));
+				SetSettings (client, obj);
+				_httpResponse = await client.PutAsync (string.Format ("{0}/{1}", resourceName, GetDocumentId (obj)), SerializeObject (obj));
 				return _httpResponse;
 			}
 		}
 
-		public async Task<HttpResponseMessage> PutAsync (object value)
+		/// <summary>
+		/// Performs an asynchronous PUT request on a document endpoint.
+		/// </summary>
+		/// <returns>The raw response returned by the service.</returns>
+		/// <param name="obj">Object to be stored on the service.</param>
+		public async Task<HttpResponseMessage> PutAsync (object obj)
 		{
-			return await PutAsync (ResourceName, value);
+			return await PutAsync (ResourceName, obj);
 		}
 
-		public async Task<T> PutAsync<T> (string resourceName, object value)
+		/// <summary>
+		/// Performs an asynchronous PUT request on a document endpoint.
+		/// </summary>
+		/// <returns>The instance of the document.</returns>
+		/// <param name="resourceName">Resource name.</param>
+		/// <param name="obj">Object to be stored on the service.</param>
+		/// <typeparam name="T">Type of the document.</typeparam>
+		public async Task<T> PutAsync<T> (string resourceName, object obj)
 		{
-			_httpResponse = await PutAsync (resourceName, value);
+			_httpResponse = await PutAsync (resourceName, obj);
 
 			switch (_httpResponse.StatusCode) {
 			case HttpStatusCode.OK:
 				var s = await _httpResponse.Content.ReadAsStringAsync ();
-				T obj = JsonConvert.DeserializeObject<T> (s);
-				return obj;
+				T instance = JsonConvert.DeserializeObject<T> (s);
+				return instance;
 			default:
 				return default(T);
 			}
 		}
 
-		public async Task<T> PutAsync<T> (object value)
+		/// <summary>
+		/// Performs an asynchronous PUT request on a document endpoint.
+		/// </summary>
+		/// <returns>An instance of the document.</returns>
+		/// <param name="obj">Object to be stored on the service.</param>
+		/// <typeparam name="T">Type of the document.</typeparam>
+		public async Task<T> PutAsync<T> (object obj)
 		{
 			ValidateResourceName ();
-			return await PutAsync<T> (ResourceName, value);
+			return await PutAsync<T> (ResourceName, obj);
 		}
 
 		#endregion
 
 		#region "D E L E T E"
 
-		public async Task<HttpResponseMessage> DeleteAsync (string resourceName, object value)
+		/// <summary>
+		/// Performs an asynchronous DELETE request on a document endpoint.
+		/// </summary>
+		/// <returns>The raw response returned by the service.</returns>
+		/// <param name="resourceName">Resource name.</param>
+		/// <param name="obj">Object to be deleted on the service.</param>
+		public async Task<HttpResponseMessage> DeleteAsync (string resourceName, object obj)
 		{
 
 			ValidateBaseAddress ();
 			if (resourceName == null) {
 				throw new ArgumentNullException ("ResourceName");
 			}
-			if (value == null) {
+			if (obj == null) {
 				throw new ArgumentNullException ("value");
 			}
 
 			using (var client = new HttpClient ()) {
-				SetSettings (client, value);
-				_httpResponse = await client.DeleteAsync (string.Format ("{0}/{1}", resourceName, GetDocumentId (value)));
+				SetSettings (client, obj);
+				_httpResponse = await client.DeleteAsync (string.Format ("{0}/{1}", resourceName, GetDocumentId (obj)));
 				return _httpResponse;
 			}
 		}
 
-		public async Task<HttpResponseMessage> DeleteAsync (object value)
+		/// <summary>
+		/// Performs an asynchronous DELETE request on a document endpoint
+		/// </summary>
+		/// <returns>The raw response returned by the service.</returns>
+		/// <param name="obj">Object to be deleted from the service.</param>
+		public async Task<HttpResponseMessage> DeleteAsync (object obj)
 		{
 			ValidateResourceName ();
-			_httpResponse = await DeleteAsync (ResourceName, value);
+			_httpResponse = await DeleteAsync (ResourceName, obj);
 			return _httpResponse;
 		}
 
@@ -234,12 +340,29 @@ namespace Amica.vNext.Http
 
 		#region "P R O P R I E R T I E S"
 
+		/// <summary>
+		/// Gets or sets the remote service base address.
+		/// </summary>
+		/// <value>The remote service base address.</value>
 		public Uri BaseAddress { get; set; }
 
+		/// <summary>
+		/// Gets or sets the name of the resource endpoint.
+		/// </summary>
+		/// <value>The name of the resource endpoint.</value>
 		public string ResourceName { get; set; }
 
+		/// <summary>
+		/// Gets or sets the document identifier.
+		/// </summary>
+		/// <value>The document identifier.</value>
+		/// <remarks>Used in conjuction with BaseAddress and ResourceName to construct the document endpoint.</remarks>
 		public string DocumentId { get; set; }
 
+		/// <summary>
+		/// Represents a HTTP response message.
+		/// </summary>
+		/// <value>The http response.</value>
 		public HttpResponseMessage HttpResponse{ get { return _httpResponse; } }
 
 		/// <summary>
@@ -255,6 +378,11 @@ namespace Amica.vNext.Http
 
 		#region "S U P P O R T"
 
+		/// <summary>
+		/// Sets the default client settings needed by GET and POST request methods.
+		/// </summary>
+		/// <param name="client">HttpClient instance.</param>
+		/// <remarks>>Does not handle the If-Match header.</remarks>
 		private void SetSettings (HttpClient client)
 		{
 			client.BaseAddress = BaseAddress;
@@ -266,40 +394,67 @@ namespace Amica.vNext.Http
 
 		}
 
-		private void SetSettings (HttpClient client, object value)
+		/// <summary>
+		/// Sets the default client settings needed by PUT and DELETE request methods.
+		/// </summary>
+		/// <param name="client">HttpClient instance.</param>
+		/// <param name="obj">Object to be edited.</param>
+		/// <remarks>>Adds the object ETag to the request headers so edit operations can perform successfully.</remarks>
+		private void SetSettings (HttpClient client, object obj)
 		{
 			SetSettings (client);
-			client.DefaultRequestHeaders.TryAddWithoutValidation ("If-Match", GetETag (value));
+			client.DefaultRequestHeaders.TryAddWithoutValidation ("If-Match", GetETag (obj));
 		}
 
-		private StringContent GetContent (object value)
+		/// <summary>
+		/// Serializes an object to JSON and provides it as a StringContent object which can be used by any request method.
+		/// </summary>
+		/// <returns>A StringContent instance.</returns>
+		/// <param name="obj">The object to be serialized.</param>
+		private StringContent SerializeObject (object obj)
 		{
 			var settings = new JsonSerializerSettings { ContractResolver = new EveContractResolver () };
-			var s = JsonConvert.SerializeObject (value, settings);
+			var s = JsonConvert.SerializeObject (obj, settings);
 			var content = new StringContent (s);
 			content.Headers.ContentType = new MediaTypeHeaderValue ("application/json");
 			return content;
 		}
 
-		private string GetDocumentId (object value)
+		/// <summary>
+		/// Returns the document identifier by which the document is known on the service.
+		/// </summary>
+		/// <returns>The document identifier.</returns>
+		/// <param name="obj">The object to be sent to the service.</param>
+		private string GetDocumentId (object obj)
 		{
-			return GetRemoteMetaFieldValue (value, Meta.DocumentId);
+			return GetRemoteMetaFieldValue (obj, Meta.DocumentId);
 		}
 
-		private string GetETag (object value)
+		/// <summary>
+		/// Returns the document ETag which is needed by edit operations on the service.
+		/// </summary>
+		/// <returns>The document Etag.</returns>
+		/// <param name="obj">The object to be sent to the sent to the service.</param>
+		private string GetETag (object obj)
 		{
-			return GetRemoteMetaFieldValue (value, Meta.ETag);
+			return GetRemoteMetaFieldValue (obj, Meta.ETag);
 		}
 
-		private string GetRemoteMetaFieldValue (object value, Meta metaField)
+		/// <summary>
+		/// Returns the value of an object meta field.
+		/// </summary>
+		/// <returns>The remote meta field value.</returns>
+		/// <param name="obj">The object.</param>
+		/// <param name="metaField">Meta field to be returned.</param>
+		private string GetRemoteMetaFieldValue (object obj, Meta metaField)
 		{
-			var pInfo = value.GetType ().GetProperties ().Where (
+			var pInfo = obj.GetType ().GetProperties ().Where (
 				            p => p.IsDefined (typeof(RemoteAttribute), true)).ToList ();
 
 			foreach (var p in pInfo) {
 				var attr = (RemoteAttribute)p.GetCustomAttributes (typeof(RemoteAttribute), true).FirstOrDefault ();
 				if (attr != null && attr.Field == metaField) {
-					var v = p.GetValue (value, null);
+					var v = p.GetValue (obj, null);
 					if (v == null) {
 						// TODO explicit exception, also see TODO above.
 						throw new Exception ("RemoteId value cannot be null when doing an edit operation.");
@@ -310,6 +465,9 @@ namespace Amica.vNext.Http
 			throw new Exception ("No property was flagged with the RemoteId attribute, which is needed for edit operations.");
 		}
 
+		/// <summary>
+		/// Validates the name of the resource.
+		/// </summary>
 		private void ValidateResourceName ()
 		{
 			if (ResourceName == null) {
@@ -320,6 +478,9 @@ namespace Amica.vNext.Http
 			}
 		}
 
+		/// <summary>
+		/// Validates the document identifier.
+		/// </summary>
 		private void ValidateDocumentId ()
 		{
 			if (DocumentId == null) {
@@ -330,6 +491,9 @@ namespace Amica.vNext.Http
 			}
 		}
 
+		/// <summary>
+		/// Validates the base address.
+		/// </summary>
 		private void ValidateBaseAddress ()
 		{
 			if (BaseAddress == null) {
@@ -338,9 +502,5 @@ namespace Amica.vNext.Http
 		}
 
 		#endregion
-
-
 	}
-
-
 }

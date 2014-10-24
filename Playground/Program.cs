@@ -53,10 +53,10 @@ namespace Playground
 				Console.WriteLine (company.Name);
 			else
 				Console.WriteLine (rc.HttpResponse.StatusCode);
-			rc.ResourceName = "companies";
-			company.Name = "exmynewname";
-			await rc.PutAsync (company);
-			Console.WriteLine (rc.HttpResponse.StatusCode);
+//			rc.ResourceName = "companies";
+//			company.Name = "exmynewname";
+//			await rc.PutAsync (company);
+//			Console.WriteLine (rc.HttpResponse.StatusCode);
 //			Company c = await rc.GetAsync<Company> ("companies", company);
 //			Console.WriteLine (c.Name);
 

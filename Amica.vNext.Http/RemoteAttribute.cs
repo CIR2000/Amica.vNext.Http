@@ -2,6 +2,9 @@
 
 namespace Amica.vNext.Http
 {
+	/// <summary>
+	/// Remote attribute used to flag properties that map to API meta fields.
+	/// </summary>
 	[AttributeUsage (AttributeTargets.Property, Inherited = true)]
 	public class RemoteAttribute : Attribute
 	{
@@ -15,6 +18,9 @@ namespace Amica.vNext.Http
 		public Meta Field { get { return _field; } }
 	}
 
+	/// <summary>
+	/// Remote (Eve) API meta fields.
+	/// </summary>
 	public enum Meta
 	{
 		DocumentId,
