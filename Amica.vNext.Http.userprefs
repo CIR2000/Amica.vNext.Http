@@ -1,15 +1,16 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Playground/Program.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Amica.vNext.Http/RemoteAttribute.cs">
     <Files>
-      <File FileName="Playground/Program.cs" Line="2" Column="2" />
-      <File FileName="Amica.vNext.Http/RestClient.cs" Line="38" Column="38" />
-      <File FileName="Amica.vNext.Http/BasicAuthenticator.cs" Line="12" Column="12" />
+      <File FileName="Playground/Program.cs" Line="68" Column="68" />
+      <File FileName="Amica.vNext.Http/BasicAuthenticator.cs" Line="1" Column="1" />
+      <File FileName="Amica.vNext.Http/EveContractResolver.cs" Line="1" Column="1" />
+      <File FileName="Amica.vNext.Http/RemoteAttribute.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/nicola/code/Amica.vNext/Amica.vNext.Http/Playground/Program.cs" line="82" column="1" />
+      <Breakpoint file="/Users/nicola/code/Amica.vNext/Amica.vNext.Http/Playground/Program.cs" line="70" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

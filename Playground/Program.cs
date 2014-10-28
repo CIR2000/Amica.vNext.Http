@@ -4,25 +4,12 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using Amica.vNext.Http;
+using Amica.vNext.Objects;
 
 namespace Playground
 {
-	class Company
+	class Company : BaseClass
 	{
-
-
-		[JsonProperty ("_id")][Remote (Meta.DocumentId)]
-		public string RemoteId { get; set; }
-
-		[JsonProperty ("_etag")][Remote (Meta.ETag)]
-		public string ETag { get; set; }
-
-		[JsonProperty ("_updated")][Remote (Meta.LastUpdated)]
-		public DateTime? Updated { get; set; }
-
-		[JsonProperty ("_created")][Remote (Meta.DateCreated)]
-		public DateTime? Created { get; set; }
-
 		[JsonProperty ("n")]
 		public string Name { get; set; }
 

@@ -51,6 +51,10 @@
       <Project>{D0E09787-FEC9-4A6B-92D4-78DB328E749D}</Project>
       <Name>Amica.vNext.Http</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Amica.vNext.Objects\Amica.vNext.Objects\Amica.vNext.Objects.csproj">
+      <Project>{5489E3A4-1031-4568-8B63-A28C64BF7778}</Project>
+      <Name>Amica.vNext.Objects</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
