@@ -8,7 +8,7 @@ namespace Amica.vNext.Http
 	[AttributeUsage (AttributeTargets.Property, Inherited = true)]
 	public class RemoteAttribute : Attribute
 	{
-		private Meta _field;
+		private readonly Meta _field;
 
 		public RemoteAttribute (Meta field)
 		{
