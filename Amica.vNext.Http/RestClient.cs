@@ -276,7 +276,7 @@ namespace Amica.vNext.Http
 			switch (_httpResponse.StatusCode) {
 			case HttpStatusCode.OK:
 				var s = await _httpResponse.Content.ReadAsStringAsync ();
-				T instance = JsonConvert.DeserializeObject<T> (s);
+				var instance = JsonConvert.DeserializeObject<T> (s);
 				return instance;
 			default:
 				return default(T);
@@ -334,7 +334,6 @@ namespace Amica.vNext.Http
 			_httpResponse = await DeleteAsync (ResourceName, obj);
 			return _httpResponse;
 		}
-
 		#endregion
 
 		#region "P R O P R I E R T I E S"
@@ -456,7 +455,7 @@ namespace Amica.vNext.Http
 					var v = p.GetValue (obj, null);
 					if (v == null) {
 						// TODO explicit exception, also see TODO above.
-						throw new Exception ("RemoteId value cannot be null when doing an edit operation.");
+						throw new Exception (string.Format("{0} value cannot be null when doing an edit operation.", metaField.ToString()));
 					}
 					return v.ToString ();
 				}
