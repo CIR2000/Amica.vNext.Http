@@ -409,7 +409,7 @@ namespace Amica.vNext.Http
 		/// </summary>
 		/// <returns>A StringContent instance.</returns>
 		/// <param name="obj">The object to be serialized.</param>
-		private StringContent SerializeObject (object obj)
+		private static StringContent SerializeObject (object obj)
 		{
 			var settings = new JsonSerializerSettings { ContractResolver = new EveContractResolver () };
 			var s = JsonConvert.SerializeObject (obj, settings);
@@ -423,7 +423,7 @@ namespace Amica.vNext.Http
 		/// </summary>
 		/// <returns>The document identifier.</returns>
 		/// <param name="obj">The object to be sent to the service.</param>
-		private string GetDocumentId (object obj)
+		private static string GetDocumentId (object obj)
 		{
 			return GetRemoteMetaFieldValue (obj, Meta.DocumentId);
 		}
@@ -433,7 +433,7 @@ namespace Amica.vNext.Http
 		/// </summary>
 		/// <returns>The document Etag.</returns>
 		/// <param name="obj">The object to be sent to the sent to the service.</param>
-		private string GetETag (object obj)
+		private static string GetETag (object obj)
 		{
 			return GetRemoteMetaFieldValue (obj, Meta.ETag);
 		}
@@ -444,7 +444,7 @@ namespace Amica.vNext.Http
 		/// <returns>The remote meta field value.</returns>
 		/// <param name="obj">The object.</param>
 		/// <param name="metaField">Meta field to be returned.</param>
-		private string GetRemoteMetaFieldValue (object obj, Meta metaField)
+		private static string GetRemoteMetaFieldValue (object obj, Meta metaField)
 		{
 			var pInfo = obj.GetType ().GetProperties ().Where (
 				            p => p.IsDefined (typeof(RemoteAttribute), true)).ToList ();
