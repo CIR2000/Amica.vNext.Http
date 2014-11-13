@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 
 namespace Amica.vNext.Http
 {
+
 	public class BasicAuthenticator
 	{
 		/// <summary>

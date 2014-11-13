@@ -111,7 +111,6 @@ namespace Amica.vNext.Http
 		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
 		public async Task<T> GetAsync<T> (string documentId)
 		{
-			ValidateDocumentId ();
 			return await GetAsync<T> (ResourceName, documentId);
 		}
 
@@ -150,7 +149,7 @@ namespace Amica.vNext.Http
 				throw new ArgumentNullException ("obj");
 			}
 
-			return await GetAsync<T> (ResourceName, GetDocumentId (obj));
+			return await GetAsync<T> (resourceName, GetDocumentId (obj));
 		}
 
 		#endregion
