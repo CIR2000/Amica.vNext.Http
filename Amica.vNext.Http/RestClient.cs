@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Amica.vNext.Http
 {
@@ -46,7 +48,20 @@ namespace Amica.vNext.Http
 		#endregion
 
 		#region "G E T"
-
+        /// <summary>
+        /// Performs an asynchronous GET request on an arbitrary endpoint.
+        /// </summary>
+        /// <param name="uri">Endpoint URI.</param>
+	    public async Task<HttpResponseMessage> GetAsync(string uri)
+	    {
+			ValidateBaseAddress ();
+			using (var client = new HttpClient ()) {
+				SetSettings (client);
+			    _httpResponse = await client.GetAsync(uri);
+				return _httpResponse;
+			}
+	        
+	    }
 		/// <summary>
 		/// Perform an asynchronous GET request on a document endpoint. 
 		/// </summary>
@@ -56,20 +71,13 @@ namespace Amica.vNext.Http
 		public async Task<HttpResponseMessage> GetAsync (string resourceName, string documentId)
 		{
 
-			ValidateBaseAddress ();
 			if (resourceName == null) {
 				throw new ArgumentNullException ("resourceName");
 			}
 			if (documentId == null) {
 				throw new ArgumentNullException ("documentId");
 			}
-
-			using (var client = new HttpClient ()) {
-				SetSettings (client);
-				_httpResponse = await client.GetAsync (string.Format ("{0}/{1}", resourceName, documentId));
-				return _httpResponse;
-			}
-
+            return await GetAsync(string.Format ("{0}/{1}", resourceName, documentId));
 		}
 
 		/// <summary>
@@ -104,14 +112,21 @@ namespace Amica.vNext.Http
 		}
 
 		/// <summary>
-		/// Performs an asynchronous GET request on a documet endpoint.
+		/// Performs an asynchronous GET request on a resource endpoint.
 		/// </summary>
-		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
-		/// <param name="documentId">Document identifier.</param>
+		/// <returns>A list of objects of the requested type, or null if the response from the remote service was something other than 200 OK.</returns>
+		/// <param name="resourceName">Resource endpoint.</param>
 		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
-		public async Task<T> GetAsync<T> (string documentId)
+		public async Task<List<T>> GetAsync<T> (string resourceName)
 		{
-			return await GetAsync<T> (ResourceName, documentId);
+			_httpResponse = await GetAsync (resourceName);
+
+		    if (_httpResponse.StatusCode != HttpStatusCode.OK)
+		        return default(List<T>);
+			var json = await _httpResponse.Content.ReadAsStringAsync ();
+
+		    var jo = JObject.Parse(json);
+		    return JsonConvert.DeserializeObject<List<T>>(jo.Property("_items").Value.ToString(Formatting.None));
 		}
 
 		/// <summary>

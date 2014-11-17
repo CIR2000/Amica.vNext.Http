@@ -189,7 +189,7 @@ namespace Amica.vNext.Http.Tests
             var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
             Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
 
-            var result = rc.GetAsync<Company>(Endpoint,original.UniqueId).Result;
+            var result = rc.GetAsync<Company>(Endpoint, original.UniqueId).Result;
             Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
             ValidateAreEquals(original, result);
         }
@@ -211,22 +211,26 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
-        public void GetAsyncTAlt2()
+        public void GetAsyncListOfT()
         {
             var rc = new RestClient(Service);
 
             // POST in order to get a valid ETag
-            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
+            var original1 = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name1"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+            var original2 = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name2"}).Result;
             Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
 
-            rc.ResourceName = Endpoint;
-            var result = rc.GetAsync<Company>(original.UniqueId).Result;
+            //rc.ResourceName = Endpoint;
+            var result = rc.GetAsync<Company>(Endpoint).Result;
             Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
-            ValidateAreEquals(original, result);
+            Assert.AreEqual(result.Count,2);
+            ValidateAreEquals(original1, result[0]);
+            ValidateAreEquals(original2, result[1]);
         }
 
         [Test]
-        public void GetAsyncTAlt3()
+        public void GetAsyncTAlt2()
         {
             var rc = new RestClient(Service);
 
@@ -241,7 +245,7 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
-        public void GetAsyncTAlt4()
+        public void GetAsyncTAlt3()
         {
             var rc = new RestClient(Service);
 
