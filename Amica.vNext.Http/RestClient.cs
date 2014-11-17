@@ -48,6 +48,7 @@ namespace Amica.vNext.Http
 		#endregion
 
 		#region "G E T"
+
         /// <summary>
         /// Performs an asynchronous GET request on an arbitrary endpoint.
         /// </summary>
@@ -100,15 +101,14 @@ namespace Amica.vNext.Http
 		}
 
 		/// <summary>
-		/// Performs an asynchronous GET request on a documet endpoint.
+		/// Performs an asynchronous GET request on resource endpoint.
 		/// </summary>
-		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <returns>A list of objects of the requested type, or null if the response from the remote service was something other than 200 OK.</returns>
 		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
-		public async Task<T> GetAsync<T> ()
+		public async Task<List<T>> GetAsync<T> ()
 		{
 			ValidateResourceName ();
-			ValidateDocumentId ();
-			return await GetAsync<T> (ResourceName, DocumentId);
+			return await GetAsync<T> (ResourceName);
 		}
 
 		/// <summary>
@@ -119,6 +119,13 @@ namespace Amica.vNext.Http
 		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
 		public async Task<List<T>> GetAsync<T> (string resourceName)
 		{
+			if (resourceName == null) {
+				throw new ArgumentNullException ("resourceName");
+			}
+			if (resourceName == string.Empty) {
+				throw new ArgumentException ("resourceName cannot be empty.");
+			}
+
 			_httpResponse = await GetAsync (resourceName);
 
 		    if (_httpResponse.StatusCode != HttpStatusCode.OK)
