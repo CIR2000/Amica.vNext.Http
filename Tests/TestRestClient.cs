@@ -5,6 +5,8 @@ using System;
 using System.Net;
 using System.Net.Http;
 
+// TODO test that exceptions are raised when arguments or properties are null or empty.
+
 namespace Amica.vNext.Http.Tests
 {
     [TestFixture]
@@ -29,6 +31,8 @@ namespace Amica.vNext.Http.Tests
             Assert.AreEqual(ba.UserName, "user"); 
             Assert.AreEqual(ba.Password, "pw");
         }
+
+        #region "P O S T"
 
         [Test]
         public void PostAsyncT()
@@ -74,6 +78,9 @@ namespace Amica.vNext.Http.Tests
             ValidateReturnedHttpResponse(message, original);
         }
 
+        #endregion
+
+        #region "P U T"
         [Test]
         public void PutAsyncT()
         {
@@ -140,6 +147,9 @@ namespace Amica.vNext.Http.Tests
             ValidateReturnedHttpResponse(message, original);
         }
 
+        #endregion
+
+        #region "D E L E T E"
 
         [Test]
         public void DeleteAsync()
@@ -180,6 +190,10 @@ namespace Amica.vNext.Http.Tests
             Assert.AreEqual(HttpStatusCode.NotFound, message.StatusCode);
         }
 
+        #endregion
+
+        #region "G E T"
+
         [Test]
         public void GetAsyncListOfT()
         {
@@ -210,12 +224,17 @@ namespace Amica.vNext.Http.Tests
             var original2 = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name2"}).Result;
             Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
 
-            //rc.ResourceName = Endpoint;
             var result = rc.GetAsync<Company>(Endpoint).Result;
             Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
             Assert.AreEqual(result.Count,2);
             ValidateAreEquals(original1, result[0]);
             ValidateAreEquals(original2, result[1]);
+
+            //result = rc.GetAsync<Company>("companies?where={\"n\":\"Name2\"}").Result;
+            //Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
+            //Assert.AreEqual(result.Count,1);
+            ////ValidateAreEquals(original1, result[0]);
+            //ValidateAreEquals(original2, result[0]);
         }
 
         [Test]
@@ -260,6 +279,8 @@ namespace Amica.vNext.Http.Tests
             Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
             ValidateAreEquals(original, result);
         }
+
+        #endregion
 
         /// <summary>
         /// Validate that two Company instances are equal (properties have same values)

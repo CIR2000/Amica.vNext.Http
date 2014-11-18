@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+// TODO Support for Queries
+// TODO: native supprot for request headers like If-Modified-Since.
+
 namespace Amica.vNext.Http
 {
 	public class RestClient
