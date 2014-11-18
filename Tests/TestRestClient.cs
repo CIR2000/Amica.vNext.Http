@@ -1,4 +1,5 @@
-﻿using Amica.vNext.Objects;
+﻿using System.Threading.Tasks;
+using Amica.vNext.Objects;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using System;
@@ -6,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 
 // TODO test that exceptions are raised when arguments or properties are null or empty.
+// Those already available are being ignored by NUnit since it does not fully support async tests.
 
 namespace Amica.vNext.Http.Tests
 {
@@ -229,12 +231,6 @@ namespace Amica.vNext.Http.Tests
             Assert.AreEqual(result.Count,2);
             ValidateAreEquals(original1, result[0]);
             ValidateAreEquals(original2, result[1]);
-
-            //result = rc.GetAsync<Company>("companies?where={\"n\":\"Name2\"}").Result;
-            //Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
-            //Assert.AreEqual(result.Count,1);
-            ////ValidateAreEquals(original1, result[0]);
-            //ValidateAreEquals(original2, result[0]);
         }
 
         [Test]
@@ -278,6 +274,38 @@ namespace Amica.vNext.Http.Tests
             var result = rc.GetAsync<Company>(Endpoint, original).Result;
             Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
             ValidateAreEquals(original, result);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="BaseAddress")]
+        public async Task GetAsyncBase_BaseAddessNullException()
+        {
+            var rc = new RestClient();
+            var result = await rc.GetAsync<Company>(Endpoint);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="resourceName")]
+        public async Task GetAsyncT_resourceNameNullException()
+        {
+            var rc = new RestClient(Service);
+            var result = await rc.GetAsync<Company>(null, "123");
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="documentId")]
+        public async Task GetAsyncT_documentIdNullException()
+        {
+            var rc = new RestClient(Service);
+            var result = await rc.GetAsync<Company>("123", null);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="ResourceName")]
+        public async Task GetAsyncT_ResourceNameNullException()
+        {
+            var rc = new RestClient(Service);
+            var result = await rc.GetAsync<Company>(null);
         }
 
         #endregion

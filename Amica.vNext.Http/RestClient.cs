@@ -478,7 +478,6 @@ namespace Amica.vNext.Http
 				if (attr != null && attr.Field == metaField) {
 					var v = p.GetValue (obj, null);
 					if (v == null) {
-						// TODO explicit exception, also see TODO above.
 						throw new Exception (string.Format("{0} value cannot be null when doing an edit operation.", metaField.ToString()));
 					}
 					return v.ToString ();
