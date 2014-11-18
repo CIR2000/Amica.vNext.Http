@@ -277,7 +277,7 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="BaseAddress")]
+        [ExpectedException(typeof(ArgumentNullException))]
         public async Task GetAsyncBase_BaseAddessNullException()
         {
             var rc = new RestClient();
@@ -285,7 +285,7 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="resourceName")]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="resourceName",MatchType= MessageMatch.Contains)]
         public async Task GetAsyncT_resourceNameNullException()
         {
             var rc = new RestClient(Service);
@@ -293,7 +293,7 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="documentId")]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="documentId", MatchType = MessageMatch.Contains)]
         public async Task GetAsyncT_documentIdNullException()
         {
             var rc = new RestClient(Service);
@@ -301,7 +301,7 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="ResourceName")]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="resourceName", MatchType = MessageMatch.Contains)]
         public async Task GetAsyncT_ResourceNameNullException()
         {
             var rc = new RestClient(Service);
