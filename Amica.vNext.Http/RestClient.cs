@@ -501,21 +501,7 @@ namespace Amica.vNext.Http
 			}
 		}
 
-		/// <summary>
-		/// Validates the document identifier.
-		/// </summary>
-		private void ValidateDocumentId ()
-		{
-			if (DocumentId == null) {
-                // ReSharper disable once NotResolvedInText
-				throw new ArgumentNullException ("DocumentId");
-			}
-			if (DocumentId == string.Empty) {
-				throw new ArgumentException ("DocumentId cannot be empty.");
-			}
-		}
-
-		/// <summary>
+	    /// <summary>
 		/// Validates the base address.
 		/// </summary>
 		private void ValidateBaseAddress ()
