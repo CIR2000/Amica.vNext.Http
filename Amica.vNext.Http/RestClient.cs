@@ -52,49 +52,45 @@ namespace Amica.vNext.Http
 
 		#region "G E T"
 
-        /// <summary>
-        /// Performs an asynchronous GET request on an arbitrary endpoint.
-        /// </summary>
-        /// <param name="uri">Endpoint URI.</param>
-	    public async Task<HttpResponseMessage> GetAsync(string uri)
+	    public async Task<HttpResponseMessage> GetAsync(string uri, string etag)
 	    {
+	        if (uri == null) {
+	            throw new ArgumentNullException("uri");
+	        }
 			ValidateBaseAddress ();
+
 			using (var client = new HttpClient ()) {
-				SetSettings (client);
+				Settings (client);
+			    if (etag != null) {
+                    client.DefaultRequestHeaders.TryAddWithoutValidation ("If-None-Match", etag);
+			    }
 			    _httpResponse = await client.GetAsync(uri);
 				return _httpResponse;
 			}
 	        
 	    }
-		/// <summary>
-		/// Perform an asynchronous GET request on a document endpoint. 
-		/// </summary>
-		/// <returns>The raw response returned by the service.</returns>
-		/// <param name="resourceName">Resource name.</param>
-		/// <param name="documentId">Document identifier.</param>
-		public async Task<HttpResponseMessage> GetAsync (string resourceName, string documentId)
+        /// <summary>
+        /// Performs an asynchronous GET request on an arbitrary endpoint.
+        /// </summary>
+        /// <param name="uri">Endpoint URI.</param>
+	    public async Task<HttpResponseMessage> GetAsync(string uri)
+        {
+            return await GetAsync(uri, null);
+        }
+
+		public async Task<T> GetAsync<T> (string resourceName, string documentId, string etag)
 		{
 
 			if (resourceName == null) {
 				throw new ArgumentNullException ("resourceName");
 			}
+			if (resourceName == string.Empty) {
+				throw new ArgumentException ("resourceName cannot be empty.");
+			}
 			if (documentId == null) {
 				throw new ArgumentNullException ("documentId");
 			}
-            return await GetAsync(string.Format ("{0}/{1}", resourceName, documentId));
-		}
-
-		/// <summary>
-		/// Performs an asynchronous GET request on a documet endpoint.
-		/// </summary>
-		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
-		/// <param name="resourceName">Resource name.</param>
-		/// <param name="documentId">Document identifier.</param>
-		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
-		public async Task<T> GetAsync<T> (string resourceName, string documentId)
-		{
-
-			_httpResponse = await GetAsync (resourceName, documentId);
+			_httpResponse = await GetAsync (string.Format ("{0}/{1}", resourceName, documentId), etag);
 
 			if (_httpResponse.StatusCode != HttpStatusCode.OK)
 				return default(T);
@@ -104,7 +100,49 @@ namespace Amica.vNext.Http
 		}
 
 		/// <summary>
-		/// Performs an asynchronous GET request on resource endpoint.
+		/// Performs an asynchronous GET request on a document endpoint.
+		/// </summary>
+		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <param name="resourceName">Resource name.</param>
+		/// <param name="documentId">Document identifier.</param>
+		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
+		public async Task<T> GetAsync<T> (string resourceName, string documentId)
+		{
+		    return await GetAsync<T>(resourceName, documentId, null);
+		}
+
+		/// <summary>
+		/// Performs an asynchronous GET request of a document.
+		/// </summary>
+		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <param name="obj">The instance of the document to be retrieved.</param>
+		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
+		public async Task<T> GetAsync<T> (object obj)
+		{
+			ValidateResourceName ();
+		    return await GetAsync<T>(ResourceName, obj);
+		}
+
+		/// <summary>
+		/// Performs an asynchronous GET request on a document endpoint.
+		/// </summary>
+		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
+		/// <param name="resourceName">The resource name.</param>
+		/// <param name="obj">The instance of the document to be retrieved.</param>
+		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
+		public async Task<T> GetAsync<T> (string resourceName, object obj)
+		{
+			if (obj == null) {
+				throw new ArgumentNullException ("obj");
+			}
+
+			var retObj = await GetAsync<T> (resourceName, GetDocumentId (obj), GetETag(obj));
+
+		    return _httpResponse.StatusCode == HttpStatusCode.NotModified ? (T)obj : retObj;
+		}
+
+		/// <summary>
+		/// Performs an asynchronous GET request for a specific document.
 		/// </summary>
 		/// <returns>A list of objects of the requested type, or null if the response from the remote service was something other than 200 OK.</returns>
 		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
@@ -139,44 +177,6 @@ namespace Amica.vNext.Http
 		    return JsonConvert.DeserializeObject<List<T>>(jo.Property("_items").Value.ToString(Formatting.None));
 		}
 
-		/// <summary>
-		/// Performs an asynchronous GET request on a document endpoint.
-		/// </summary>
-		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
-		/// <param name="obj">The instance of the document to be retrieved.</param>
-		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
-		public async Task<T> GetAsync<T> (object obj)
-		{
-			ValidateResourceName ();
-			if (obj == null) {
-				throw new ArgumentNullException ("obj");
-			}
-
-			return await GetAsync<T> (ResourceName, GetDocumentId (obj));
-		}
-
-		/// <summary>
-		/// Performs an asynchronous GET request on a document endpoint.
-		/// </summary>
-		/// <returns> An istance of the requested document, or null if document was not found or some other issue arised.</returns>
-		/// <param name="resourceName">The resource name.</param>
-		/// <param name="obj">The instance of the document to be retrieved.</param>
-		/// <typeparam name="T">The type to which the retrieved JSON should be casted.</typeparam>
-		public async Task<T> GetAsync<T> (string resourceName, object obj)
-		{
-			if (resourceName == null) {
-				throw new ArgumentNullException ("resourceName");
-			}
-			if (resourceName == string.Empty) {
-				throw new ArgumentException ("resourceName cannot be empty.");
-			}
-			if (obj == null) {
-				throw new ArgumentNullException ("obj");
-			}
-
-			return await GetAsync<T> (resourceName, GetDocumentId (obj));
-		}
-
 		#endregion
 
 		#region "P O S T"
@@ -198,7 +198,7 @@ namespace Amica.vNext.Http
 			}
 
 			using (var client = new HttpClient ()) {
-				SetSettings (client);
+				Settings (client);
 				_httpResponse = await client.PostAsync (resourceName, SerializeObject (obj));
 				return _httpResponse;
 			}
@@ -270,7 +270,7 @@ namespace Amica.vNext.Http
 			}
 
 			using (var client = new HttpClient ()) {
-				SetSettings (client, obj);
+				SettingsForEditing (client, obj);
 				_httpResponse = await client.PutAsync (string.Format ("{0}/{1}", resourceName, GetDocumentId (obj)), SerializeObject (obj));
 				return _httpResponse;
 			}
@@ -341,7 +341,7 @@ namespace Amica.vNext.Http
 			}
 
 			using (var client = new HttpClient ()) {
-				SetSettings (client, obj);
+				SettingsForEditing (client, obj);
 				_httpResponse = await client.DeleteAsync (string.Format ("{0}/{1}", resourceName, GetDocumentId (obj)));
 				return _httpResponse;
 			}
@@ -405,7 +405,7 @@ namespace Amica.vNext.Http
 		/// </summary>
 		/// <param name="client">HttpClient instance.</param>
 		/// <remarks>>Does not handle the If-Match header.</remarks>
-		private void SetSettings (HttpClient client)
+		private void Settings (HttpClient client)
 		{
 			client.BaseAddress = BaseAddress;
 			client.DefaultRequestHeaders.Accept.Clear ();
@@ -422,9 +422,9 @@ namespace Amica.vNext.Http
 		/// <param name="client">HttpClient instance.</param>
 		/// <param name="obj">Object to be edited.</param>
 		/// <remarks>>Adds the object ETag to the request headers so edit operations can perform successfully.</remarks>
-		private void SetSettings (HttpClient client, object obj)
+		private void SettingsForEditing (HttpClient client, object obj)
 		{
-			SetSettings (client);
+			Settings (client);
 			client.DefaultRequestHeaders.TryAddWithoutValidation ("If-Match", GetETag (obj));
 		}
 

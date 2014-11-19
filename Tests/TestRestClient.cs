@@ -168,7 +168,7 @@ namespace Amica.vNext.Http.Tests
             Assert.AreEqual(HttpStatusCode.OK, message.StatusCode);
 
             // confirm that item has been deleted on remote
-            message = rc.GetAsync(Endpoint, original.UniqueId).Result;
+            message = rc.GetAsync(string.Format("{0}/{1}", Endpoint, original.UniqueId)).Result;
             Assert.AreEqual(HttpStatusCode.NotFound, message.StatusCode);
         }
 
@@ -188,13 +188,138 @@ namespace Amica.vNext.Http.Tests
             Assert.AreEqual(HttpStatusCode.OK, message.StatusCode);
 
             // confirm that item has been deleted on remote
-            message = rc.GetAsync(Endpoint, original.UniqueId).Result;
+            message = rc.GetAsync(string.Format("{0}/{1}", Endpoint, original.UniqueId)).Result;
             Assert.AreEqual(HttpStatusCode.NotFound, message.StatusCode);
         }
 
         #endregion
 
         #region "G E T"
+
+        [Test]
+        public void GetAsync()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            var result = rc.GetAsync(string.Format("{0}/{1}", Endpoint, original.UniqueId)).Result;
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+        }
+
+        [Test]
+        public void GetAsyncNotModifiedAndModified()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            // Get returns NotModified as the etag matches the one on the service.
+            var result = rc.GetAsync(string.Format("{0}/{1}", Endpoint, original.UniqueId), original.ETag).Result;
+            Assert.AreEqual(HttpStatusCode.NotModified, result.StatusCode);
+
+            // GET returns OK since the etag does not match the one on the service and all object is retrieved.
+            result = rc.GetAsync(string.Format("{0}/{1}", Endpoint, original.UniqueId), "not really").Result;
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+        }
+
+        [Test]
+        public void GetAsyncT()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            var result = rc.GetAsync<Company>(Endpoint, original.UniqueId).Result;
+            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
+            ValidateAreEquals(original, result);
+        }
+
+        [Test]
+        public void GetAsyncTNotModifiedAndModifiedSimple()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            // GET will return NotModified and null object since etag still matches the one on the service.
+            var result = rc.GetAsync<Company>(Endpoint, original.UniqueId, original.ETag).Result;
+            Assert.AreEqual(HttpStatusCode.NotModified, rc.HttpResponse.StatusCode);
+            Assert.IsNull(result);
+
+            // GET will return OK and equal object since etag does not match the one on the service.
+            result = rc.GetAsync<Company>(Endpoint, original.UniqueId, "not really").Result;
+            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
+            Assert.NotNull(result);
+            Assert.AreEqual(original.UniqueId, result.UniqueId);
+        }
+
+        [Test]
+        public void GetAsyncTNotModifiedAndModifiedSimpleAlt()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            // GET will return NotModified and null object since etag still matches the one on the service.
+            var result = rc.GetAsync<Company>(Endpoint, original.UniqueId).Result;
+            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
+            Assert.AreEqual(original.UniqueId, result.UniqueId);
+        }
+
+        [Test]
+        public void GetAsyncTNotModifiedAndModifiedObj()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            // GET will return NotModified and identical object since etag still matches the one on the service.
+            var result = rc.GetAsync<Company>(Endpoint, original).Result;
+            Assert.AreEqual(HttpStatusCode.NotModified, rc.HttpResponse.StatusCode);
+            ValidateAreEquals(original, result);
+
+            // GET will return OK and different object since etag does not match the one on the service.
+            original.ETag = "not really";
+            result = rc.GetAsync<Company>(Endpoint, original).Result;
+            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
+            Assert.NotNull(result);
+            Assert.AreEqual(original.UniqueId, result.UniqueId);
+        }
+
+        [Test]
+        public void GetAsyncTNotModifiedAndModifiedObjAlt()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            // GET will return NotModified and identical object since etag still matches the one on the service.
+            var result = rc.GetAsync<Company>(Endpoint, original).Result;
+            Assert.AreEqual(HttpStatusCode.NotModified, rc.HttpResponse.StatusCode);
+            ValidateAreEquals(original, result);
+
+            // GET will return OK and different object since etag does not match the one on the service.
+            original.ETag = "not really";
+            result = rc.GetAsync<Company>(Endpoint, original).Result;
+            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
+            Assert.NotNull(result);
+            Assert.AreEqual(original.UniqueId, result.UniqueId);
+        }
 
         [Test]
         public void GetAsyncListOfT()
@@ -233,55 +358,16 @@ namespace Amica.vNext.Http.Tests
             ValidateAreEquals(original2, result[1]);
         }
 
-        [Test]
-        public void GetAsyncTAlt1()
-        {
-            var rc = new RestClient(Service);
+        #endregion
 
-            // POST in order to get a valid ETag
-            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
-            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
-
-            var result = rc.GetAsync<Company>(Endpoint, original.UniqueId).Result;
-            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
-            ValidateAreEquals(original, result);
-        }
-
-        [Test]
-        public void GetAsyncTAlt2()
-        {
-            var rc = new RestClient(Service);
-
-            // POST in order to get a valid ETag
-            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
-            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
-
-            rc.ResourceName = Endpoint;
-            var result = rc.GetAsync<Company>(original).Result;
-            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
-            ValidateAreEquals(original, result);
-        }
-
-        [Test]
-        public void GetAsyncTAlt3()
-        {
-            var rc = new RestClient(Service);
-
-            // POST in order to get a valid ETag
-            var original = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name"}).Result;
-            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
-
-            var result = rc.GetAsync<Company>(Endpoint, original).Result;
-            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
-            ValidateAreEquals(original, result);
-        }
+        #region "E X C E P T I O N S"
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
-        public async Task GetAsyncBase_BaseAddessNullException()
+        public async void GetAsyncBase_BaseAddessNullException()
         {
             var rc = new RestClient();
-            var result = await rc.GetAsync<Company>(Endpoint);
+            await rc.GetAsync<Company>(Endpoint);
         }
 
         [Test]
@@ -289,7 +375,7 @@ namespace Amica.vNext.Http.Tests
         public async Task GetAsyncT_resourceNameNullException()
         {
             var rc = new RestClient(Service);
-            var result = await rc.GetAsync<Company>(null, "123");
+            await rc.GetAsync<Company>(null, "123");
         }
 
         [Test]
@@ -297,7 +383,7 @@ namespace Amica.vNext.Http.Tests
         public async Task GetAsyncT_documentIdNullException()
         {
             var rc = new RestClient(Service);
-            var result = await rc.GetAsync<Company>("123", null);
+            await rc.GetAsync<Company>("123", null);
         }
 
         [Test]
@@ -305,7 +391,47 @@ namespace Amica.vNext.Http.Tests
         public async Task GetAsyncT_ResourceNameNullException()
         {
             var rc = new RestClient(Service);
-            var result = await rc.GetAsync<Company>(null);
+            await rc.GetAsync<Company>(null);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="resourceName", MatchType = MessageMatch.Contains)]
+        public async Task GetAsyncListOfT_resourceNameNullException()
+        {
+            var rc = new RestClient(Service);
+            await rc.GetAsync<Company>(null);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage="resourceName", MatchType = MessageMatch.Contains)]
+        public async Task GetAsyncListOfT_resourceNameArgumentException()
+        {
+            var rc = new RestClient(Service);
+            await rc.GetAsync<Company>(string.Empty);
+        }
+
+        [Test][Ignore]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="resourceName", MatchType = MessageMatch.Contains)]
+        public async Task GetAsyncT_resourceNameArgumentNullException()
+        {
+            var rc = new RestClient(Service);
+            await rc.GetAsync<Company>(null, new Company());
+        }
+
+        [Test][Ignore]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage="resourceName", MatchType = MessageMatch.Contains)]
+        public async Task GetAsyncT_resourceNameArgumentException()
+        {
+            var rc = new RestClient(Service);
+            await rc.GetAsync<Company>(string.Empty, new Company());
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="obj", MatchType = MessageMatch.Contains)]
+        public async Task GetAsyncT_objArgumentNullException()
+        {
+            var rc = new RestClient(Service);
+            await rc.GetAsync<Company>("123", obj: null);
         }
 
         #endregion
