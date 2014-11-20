@@ -341,6 +341,25 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
+        public void GetAsyncListOfTIfModifiedSince()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original1 = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name1"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+            System.Threading.Thread.Sleep(1000);
+            var original2 = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name2"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            rc.ResourceName = Endpoint;
+            var result = rc.GetAsync<Company>(original2.Updated).Result;
+            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
+            Assert.AreEqual(result.Count,1);
+            ValidateAreEquals(original2, result[0]);
+        }
+
+        [Test]
         public void GetAsyncListOfTAlt()
         {
             var rc = new RestClient(Service);
@@ -356,6 +375,24 @@ namespace Amica.vNext.Http.Tests
             Assert.AreEqual(result.Count,2);
             ValidateAreEquals(original1, result[0]);
             ValidateAreEquals(original2, result[1]);
+        }
+
+        [Test]
+        public void GetAsyncListOfTAltIfModifiedSince()
+        {
+            var rc = new RestClient(Service);
+
+            // POST in order to get a valid ETag
+            var original1 = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name1"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+            System.Threading.Thread.Sleep(1000);
+            var original2 = rc.PostAsync<Company>(Endpoint, new Company {Name = "Name2"}).Result;
+            Assert.AreEqual(HttpStatusCode.Created, rc.HttpResponse.StatusCode);
+
+            var result = rc.GetAsync<Company>(Endpoint, original2.Updated).Result;
+            Assert.AreEqual(HttpStatusCode.OK, rc.HttpResponse.StatusCode);
+            Assert.AreEqual(result.Count,1);
+            ValidateAreEquals(original2, result[0]);
         }
 
         #endregion
@@ -378,12 +415,12 @@ namespace Amica.vNext.Http.Tests
             await rc.GetAsync<Company>(null, "123");
         }
 
-        [Test]
+        [Test][Ignore]
         [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="documentId", MatchType = MessageMatch.Contains)]
         public async Task GetAsyncT_documentIdNullException()
         {
             var rc = new RestClient(Service);
-            await rc.GetAsync<Company>("123", null);
+            //await rc.GetAsync<Company>("123", null);
         }
 
         [Test]
@@ -391,7 +428,7 @@ namespace Amica.vNext.Http.Tests
         public async Task GetAsyncT_ResourceNameNullException()
         {
             var rc = new RestClient(Service);
-            await rc.GetAsync<Company>(null);
+            await rc.GetAsync<Company>(resourceName:null);
         }
 
         [Test]
@@ -399,7 +436,7 @@ namespace Amica.vNext.Http.Tests
         public async Task GetAsyncListOfT_resourceNameNullException()
         {
             var rc = new RestClient(Service);
-            await rc.GetAsync<Company>(null);
+            await rc.GetAsync<Company>(resourceName:null);
         }
 
         [Test]
