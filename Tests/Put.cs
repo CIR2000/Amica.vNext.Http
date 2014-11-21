@@ -1,4 +1,6 @@
-﻿using Amica.vNext.Objects;
+﻿using System;
+using System.Threading.Tasks;
+using Amica.vNext.Objects;
 using NUnit.Framework;
 using System.Net;
 
@@ -37,7 +39,7 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
-        public void PutAsync()
+        public void AcceptEndpointAndObjectReturnHttpResponse()
         {
             var message = RestClient.PutAsync(Endpoint, Original).Result;
             Assert.AreEqual(HttpStatusCode.OK, message.StatusCode);
@@ -45,12 +47,41 @@ namespace Amica.vNext.Http.Tests
         }
 
         [Test]
-        public void PutAsyncAlt()
+        public void AcceptObjectReturnHttpResponse()
         {
             RestClient.ResourceName = Endpoint;
             var message = RestClient.PutAsync(Original).Result;
             Assert.AreEqual(HttpStatusCode.OK, message.StatusCode);
             ValidateReturnedHttpResponse(message, Original);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="BaseAddress",MatchType= MessageMatch.Contains)]
+        public async Task BaseAddressPropertyNullException()
+        {
+            RestClient.BaseAddress = null;
+            await RestClient.PutAsync("resource", Original);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="resourceName",MatchType= MessageMatch.Contains)]
+        public async Task ResourceNameArgumentNullException()
+        {
+            await RestClient.PutAsync(null, Original);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage="resourceName",MatchType= MessageMatch.Contains)]
+        public async Task ResourceNameArgumentException()
+        {
+            await RestClient.PutAsync(string.Empty, Original);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException), ExpectedMessage="obj",MatchType= MessageMatch.Contains)]
+        public async Task ObjArgumentNullException()
+        {
+            await RestClient.PutAsync("resource", null);
         }
     }
 }
