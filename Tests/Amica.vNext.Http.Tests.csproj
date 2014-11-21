@@ -85,7 +85,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestRestClient.cs" />
+    <Compile Include="BasicAuthenticator.cs" />
+    <Compile Include="Delete.cs" />
+    <Compile Include="Get.cs" />
+    <Compile Include="GetDocuments.cs" />
+    <Compile Include="Post.cs" />
+    <Compile Include="Put.cs" />
+    <Compile Include="MethodsBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

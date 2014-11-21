@@ -545,13 +545,10 @@ namespace Amica.vNext.Http
 				var attr = (RemoteAttribute)p.GetCustomAttributes (typeof(RemoteAttribute), true).FirstOrDefault ();
 				if (attr != null && attr.Field == metaField) {
 					var v = p.GetValue (obj, null);
-					if (v == null) {
-						throw new Exception (string.Format("{0} value cannot be null when doing an edit operation.", metaField.ToString()));
-					}
-					return v.ToString ();
+				    return (v == null) ? null : v.ToString();
 				}
 			}
-			throw new Exception ("No property was flagged with the RemoteId attribute, which is needed for edit operations.");
+		    return null;
 		}
 
 		/// <summary>
