@@ -87,8 +87,8 @@
   <ItemGroup>
     <Compile Include="BasicAuthenticator.cs" />
     <Compile Include="Delete.cs" />
-    <Compile Include="Get.cs" />
-    <Compile Include="GetDocuments.cs" />
+    <Compile Include="GetSingle.cs" />
+    <Compile Include="GetMany.cs" />
     <Compile Include="Post.cs" />
     <Compile Include="Put.cs" />
     <Compile Include="MethodsBase.cs" />

@@ -7,7 +7,7 @@ using System.Net;
 namespace Amica.vNext.Http.Tests
 {
     [TestFixture]
-    class GetDocuments : MethodsBase
+    class GetMany : MethodsBase
     {
         internal Company Original2;
 

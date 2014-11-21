@@ -7,7 +7,7 @@ using System.Net;
 namespace Amica.vNext.Http.Tests
 {
     [TestFixture]
-    class Get : MethodsBase
+    class GetSingle : MethodsBase
     {
 
         [SetUp]
