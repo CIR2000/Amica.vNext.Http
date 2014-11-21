@@ -402,6 +402,9 @@ namespace Amica.vNext.Http
 			if (resourceName == null) {
 				throw new ArgumentNullException ("resourceName");
 			}
+		    if (resourceName == string.Empty) {
+		        throw new ArgumentException("resourceName");
+		    }
 			if (obj == null) {
 				throw new ArgumentNullException ("obj");
 			}
